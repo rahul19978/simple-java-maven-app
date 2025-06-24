@@ -2,8 +2,12 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9.9-eclipse-temurin-21'
-            args '-v /var/lib/jenkins/.m2:/root/.m2'
+            args '-u root:root -v /var/lib/jenkins/.m2:/var/maven/.m2'
         }
+    }
+
+    environment {
+        MAVEN_OPTS = '-Dmaven.repo.local=/var/maven/.m2'
     }
 
     options {
@@ -14,14 +18,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo '🔧 Building the project...'
-                sh 'mvn -Dmaven.repo.local=/root/.m2 -B -DskipTests clean package'
+                sh 'mvn $MAVEN_OPTS -B -DskipTests clean package'
             }
         }
 
         stage('Test') {
             steps {
                 echo '🧪 Running tests...'
-                sh 'mvn -Dmaven.repo.local=/root/.m2 test'
+                sh 'mvn $MAVEN_OPTS test'
             }
             post {
                 always {
