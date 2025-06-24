@@ -10,23 +10,22 @@ pipeline {
         skipStagesAfterUnstable()
     }
 
-    environment {
-        MAVEN_OPTS = "-Dmaven.repo.local=/root/.m2/repository"
-    }
-
     stages {
         stage('Build') {
             steps {
-                sh 'mvn -B -DskipTests clean package'
+                echo '🔧 Building the project...'
+                sh 'mvn -Dmaven.repo.local=/root/.m2 -B -DskipTests clean package'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'mvn test'
+                echo '🧪 Running tests...'
+                sh 'mvn -Dmaven.repo.local=/root/.m2 test'
             }
             post {
                 always {
+                    echo '📄 Publishing test results...'
                     junit 'target/surefire-reports/*.xml'
                 }
             }
@@ -34,6 +33,7 @@ pipeline {
 
         stage('Deliver') {
             steps {
+                echo '🚀 Delivering the application...'
                 sh './jenkins/scripts/deliver.sh'
             }
         }
